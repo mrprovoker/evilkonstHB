@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>С Днем Рождения, дорогая Эвелина!</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://hammerjs.github.io/dist/hammer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-hammerjs@2.0.0/jquery.hammer.min.js"></script>
+    <link rel="icon" type="image/png" href="images/present.png"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #74ebd5, #acb6e5);
+            font-family: 'Arial', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            transition: all 1s ease;
+            padding: 20px;
+            position: relative;
+            flex-direction: column;
+        }
+
+        #lotteryTicket {
+            position: relative;
+            width: 300px;
+            height: 150px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-left: 60px;
+        }
+
+        #scratchLayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: gray;
+            cursor: pointer;
+            pointer-events: all;
+            border-radius: 20px;
+        }
+
+        #message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2em;
+            color: #000;
+            display: none;
+        }
+
+        .wheel {
+            font-size: 100px;
+            transition: transform 5s ease-in-out;
+        }
+
+        .emoji {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0;
+            animation: fly 1s forwards;
+        }
+
+        @keyframes fly {
+            to {
+                opacity: 1;
+                transform: translateY(-300px);
+            }
+        }
+
+        .heart {
+            color: red;
+        }
+
+        #invite2,
+        #invite,
+        #room1,
+        #room2,
+        #razminka,
+        #room3 {
+            height: 100vh;
+            background-size: auto 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        #invite {
+            background-color: #fff1f6;
+            background-image: url('images/invite.jpeg');
+        }
+
+        #invite2 {
+            background-color: #fff1f6;
+            background-image: url('images/invite2.jpeg');
+        }
+
+        #room1 {
+            background-color: #000;
+            background-image: url('images/room1.jpeg');
+        }
+
+        #room3 {
+            background-color: rgba(161, 0, 255, 1);
+            background-image: url('images/room3.jpeg');
+        }
+
+        #room2 {
+            background-color: #000;
+            background-image: url('images/room2.jpeg');
+        }
+
+        #razminka {
+            width: 90vw;
+            background-color: #47473a;
+            background-image: url('images/razminka.gif');
+        }
+
+
+        .room1 {
+            background-color: pink !important;
+            color: #555;
+        }
+
+        .room3 {
+            background: linear-gradient(to bottom, #ffefba, #ffffff);
+        }
+
+        .letter {
+            position: relative;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .letter:hover {
+            color: #007BFF;
+        }
+
+        .tooltip {
+            visibility: hidden;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .letter:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .name {
+            font-size: 5em;
+            color: #333;
+            display: flex;
+        }
+
+        .hero {
+            position: relative;
+            width: 150px;
+            transition: transform 0.5s ease;
+        }
+
+        .arrow {
+            position: absolute;
+            top: 90%; /* Позиция по высоте */
+            right: 100%; /* Начинается справа */
+            width: 50px;
+            animation: shootArrow 3s forwards; /* Анимация полета */
+            animation-iteration-count: infinite;
+            transform: translateX(-100%);
+        }
+
+        @keyframes shootArrow {
+            0% {
+                right: 100%; /* Начало полета */
+                transform: translateY(0);
+            }
+            70% {
+                right: 50%; /* Половина пути */
+                transform: translateY(-20px); /* Летаем выше */
+            }
+            100% {
+                right: 45%; /* Место удара в колено */
+                transform: translateY(0);
+                opacity: 0; /* Исчезаем */
+            }
+        }
+
+        @keyframes bend {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(10px); /* Наклоняемся */
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .bend {
+            animation: bend 0.5s forwards; /* Делаем наклон */
+        }
+
+        #cupid {
+            position: relative;
+            width: 100%;
+        }
+
+        .card {
+            width: 80%;
+            max-width: 600px;
+            height: 400px;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            transform: perspective(1000px); /* Создаем 3D эффект */
+        }
+
+        .card-content {
+            position: relative;
+            height: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.5s;
+        }
+
+        .card:before,
+        .card:after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            transform: translateZ(-1px);
+            transition: transform 0.5s;
+        }
+
+        .card:before {
+            transform-origin: right;
+            transform: rotateY(0deg);
+        }
+
+        .card:after {
+            transform-origin: left;
+            transform: rotateY(0deg);
+        }
+
+        /* Анимация открывания */
+        .card:hover:before {
+            transform: rotateY(-15deg);
+        }
+
+        .card:hover:after {
+            transform: rotateY(15deg);
+        }
+
+
+        .card-content {
+            h1 {
+                font-size: 24px;
+                margin: 10px 0;
+                color: #333;
+            }
+
+            p {
+                font-size: 18px;
+                line-height: 1.5;
+                color: #555;
+            }
+        }
+
+        #main {
+            position: relative;
+            margin: auto;
+            width: 360px;
+            height: 460px;
+        }
+
+        #toys {
+            position: absolute;
+            top: 210px;
+            left: 102px;
+            width: 231px;
+            height: 121px;
+            background-image: url(https://image.ibb.co/i7YAJz/toysBG.png);
+        }
+
+        .toy {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            width: 50px;
+            height: 50px;
+            background-image: url(https://image.ibb.co/n8g2WK/toys.png);
+            background-size: 350px 350px;
+            background-position: 0 0;
+        }
+
+        #moveContainer {
+            position: absolute;
+            top: 343px;
+            left: 102px;
+            width: 231px;
+            height: 36px;
+            background: #434242;
+            border: 2px solid #898989;
+            border-radius: 20px;
+        }
+
+        #moveControl {
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            width: 36px;
+            height: 36px;
+            background: #303030;
+            border: 2px solid #898989;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        #claw {
+            position: absolute;
+            top: 65px;
+            left: 30px;
+            width: 60px;
+            height: 260px;
+        }
+
+        #clawBar {
+            position: absolute;
+            top: 20px;
+            left: 27px;
+            width: 6px;
+            height: 15px;
+            background: #5b5b5b;
+        }
+
+        #clawALL {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 60px;
+        }
+
+        #clawBall {
+            position: absolute;
+            top: 31px;
+            left: 21px;
+            width: 6px;
+            height: 6px;
+            border: 6px solid #5b5b5b;
+            border-radius: 50%;
+        }
+
+        #leftClaw {
+            position: absolute;
+            top: 36px;
+            left: 3px;
+            width: 16px;
+            height: 25px;
+            border-top: 8px solid #5b5b5b;
+            border-left: 4px solid #5b5b5b;
+            transform-origin: top right;
+            transform: rotate(-30deg);
+        }
+
+        #rightClaw {
+            position: absolute;
+            top: 36px;
+            right: 3px;
+            width: 16px;
+            height: 25px;
+            border-top: 8px solid #5b5b5b;
+            border-right: 4px solid #5b5b5b;
+            transform-origin: top left;
+            transform: rotate(30deg);
+        }
+
+        #clawOpen {
+            transform: rotate(0deg);
+        }
+
+        @-webkit-keyframes fullsize {
+            from {
+                transform: scale(1) translate(0, 0)
+            }
+            to {
+                transform: scale(4) translate(30px, -30px)
+            }
+        }
+
+        .claw {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        #roulette {
+            margin-left: 60px;
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='48' viewport='0 0 100 100' style='fill:black;font-size:24px;'><text y='50%'>😏</text></svg>") 16 0, auto;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="invite"></div>
+<div id="invite2"></div>
+
+<div class="room1">
+    <div id="room1"></div>
+
+    <div class="section">
+        <h3>Во-первых, всегда оставайся самой собой</h3>
+
+        <div class="name">
+            <div class="letter">
+                Э
+                <div class="tooltip">Эрудированная</div>
+            </div>
+            <div class="letter">
+                В
+                <div class="tooltip">Вдохновляющая</div>
+            </div>
+            <div class="letter">
+                Е
+                <div class="tooltip">Естественная</div>
+            </div>
+            <div class="letter">
+                Л
+                <div class="tooltip">Ласковая</div>
+            </div>
+            <div class="letter">
+                И
+                <div class="tooltip">Искренняя</div>
+            </div>
+            <div class="letter">
+                Н
+                <div class="tooltip">Нежная</div>
+            </div>
+            <div class="letter">
+                А
+                <div class="tooltip">Амбициозная</div>
+            </div>
+        </div>
+
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+
+        <p>P.S. и ПРИКОЛЬНАЯ конечно же!</p>
+        <p>P.P.S. на самом деле список сильно больше и ты это знаешь 🙃</p>
+    </div>
+
+    <div class="section">
+        <div class="card">
+            <div class="card-content">
+                <h1>Во-вторых, оставайся такой же обворожительной!</h1>
+                <p>Готов ловить стрелы в колено каждый раз, когда вижу тебя 🏹</p>
+            </div>
+        </div>
+
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+
+        <div id="cupid">
+            <img src="images/standman.png" alt="человек" class="hero" id="hero">
+            <img src="images/arrow.png" alt="стрела" class="arrow" id="arrow">
+        </div>
+
+    </div>
+</div>
+
+<div class="room2">
+    <div id="room2"></div>
+
+    <div class="section">
+        <div class="claw">
+            <div class="card">
+                <div class="card-content">
+                    <h1>Хватай-ка!</h1>
+                    <p>Желаю цепляться за то, что тебе нравится, максимально крепко 🤗</p>
+                </div>
+            </div>
+            <div id="main">
+                <svg width="360px" height="460px" version="1.1" fill-rule="evenodd" clip-rule="evenodd"
+                     viewBox="0 0 3600000 4600000" style="position:absolute;top:0;left:0;">
+                    <defs>
+                        <linearGradient id="id0" gradientUnits="userSpaceOnUse" x1="1.13348e+06" y1="4.24542e+06"
+                                        x2="2.46652e+06" y2="320943">
+                            <stop offset="0" stop-opacity="1" stop-color="#5B5B5B"/>
+                            <stop offset="1" stop-opacity="1" stop-color="#403F3F"/>
+                        </linearGradient>
+                        <linearGradient id="id1" gradientUnits="userSpaceOnUse" x1="580669" y1="3.44318e+06" x2="654583"
+                                        y2="4.26414e+06">
+                            <stop offset="0" stop-opacity="1" stop-color="#4A4A4A"/>
+                            <stop offset="1" stop-opacity="1" stop-color="#1F1B20"/>
+                        </linearGradient>
+                    </defs>
+                    <path fill="url(#id0)"
+                          d="M320943 169111l2958114 0c103737,0 188600,84934 188600,188588l0 4039550 -3335314 0 0 -4039550c0,-103737 84863,-188588 188600,-188588zm695757 3140950l0 -1210579 -46607 0 0 1210579 -704934 0 0 -2704529 3069682 0 0 2704529 -2318141 0z"/>
+                    <rect fill="#C5C6C6" x="265159" y="697705" width="3069682" height="56989"/>
+                    <rect fill="url(#id1)" stroke="#898989" stroke-width="19996.2" x="265159" y="3441070" width="704934"
+                          height="825183" rx="105154" ry="105154"/>
+                    <rect fill="#434242" x="332353" y="4397249" width="154655" height="111095"/>
+                    <rect fill="#434242" x="3112993" y="4397249" width="154655" height="111095"/>
+                    <path fill="#FDF38E" fill-rule="nonzero"
+                          d="M555866 430940l0 -30638 -30638 0 0 -45638 76276 0 0 121914 -152706 0c-30531,0 -45791,-15260 -45791,-45792l0 -106914c0,-30531 15260,-45791 45791,-45791l152706 0 -59 30425 59 15213 -137599 0c-10158,0 -15260,5102 -15260,15319l0 76583c0,10216 10204,15319 30638,15319l76583 0zm91382 45638l0 -198497 152553 0c30425,0 45638,15260 45638,45850l0 30532c0,30579 -15213,45839 -45638,45839l-15319 0 60957 45744 0 30532 -26268 0 -111025 -76276 -15260 0 0 76276 -45638 0zm45638 -121914l91643 0c10157,0 15272,-5162 15272,-15473 0,-10311 -5115,-15472 -15272,-15472l-91643 0 0 30945zm244242 121914l-45638 0 0 -152706c0,-30531 15213,-45791 45638,-45791l106914 0c30426,0 45638,15260 45638,45791l0 152706 -45638 0 0 -61264 -106914 0 0 61264zm91643 -152859l-76383 0c-10157,0 -15260,5102 -15260,15319l0 30638 106914 0 0 -30638c0,-10217 -5114,-15319 -15271,-15319zm305151 107115c0,30484 -15213,45744 -45638,45744l-152552 0 0 -198497 122020 0 30532 0c30425,0 45638,15319 45638,45909l0 30567c0,15060 -7984,23138 -23870,24131 15886,-1725 23870,10570 23870,36933l0 15213zm-152552 -76170l91642 0c10170,0 15272,-5162 15272,-15473 0,-10311 -5102,-15472 -15272,-15472l-91642 0 0 30945zm0 76276l91642 0c10170,0 15272,-5103 15272,-15319 0,-10217 -5102,-15319 -15272,-15319l-91642 0 0 30638zm397195 45638l-45626 0 0 -152706c0,-30531 15201,-45791 45626,-45791l106915 0c30425,0 45638,15260 45638,45791l0 152706 -45638 0 0 -61264 -106915 0 0 61264zm91655 -152859l-76383 0c-10157,0 -15272,5102 -15272,15319l0 30638 106915 0 0 -30638c0,-10217 -5103,-15319 -15260,-15319zm259915 152859l0 -198497 152552 0c30425,0 45638,15260 45638,45850l0 30532c0,30579 -15213,45839 -45638,45839l-106914 0 0 76276 -45638 0zm45638 -121914l91642 0c10169,0 15272,-5162 15272,-15473 0,-10311 -5103,-15472 -15272,-15472l-91642 0 0 30945zm198603 121914l0 -198497 152553 0c30425,0 45638,15260 45638,45850l0 30532c0,30579 -15213,45839 -45638,45839l-15319 0 60957 45744 0 30532 -26268 0 -111024 -76276 -15260 0 0 76276 -45639 0zm45639 -121914l91642 0c10169,0 15272,-5162 15272,-15473 0,-10311 -5103,-15472 -15272,-15472l-91642 0 0 30945zm396841 121914l-198285 0 0 -45638 76323 0 0 -107221 -76323 0 0 -45638 198285 0 0 45638 -76324 0 0 107221 76324 0 0 45638zm46004 -198497l198450 0 0 38185 -122115 114674 122115 0 0 45638 -198450 0 0 -37926 122115 -114933 -122115 0 0 -45638zm244242 198497l0 -198497 198296 0 0 45638 -152658 0 0 30945 122127 0 0 45638 -122127 0 0 30638 152658 0 0 45638 -198296 0zm244242 -61111l0 -114508c0,-15272 7618,-22878 22830,-22878 15201,0 22808,7606 22808,22878l0 114508 -45638 0zm23598 61111c-15732,0 -23598,-7819 -23598,-23445 0,-14799 7452,-22193 22346,-22193 15532,0 23292,7866 23292,23598 0,14693 -7347,22040 -22040,22040z"/>
+                    <g id="b_drop" style="cursor:pointer;display:none;">
+                        <path fill="#434242" stroke="#898989" stroke-width="19996.2"
+                              d="M2261188 4266252l883447 0c104623,0 190206,-85583 190206,-190206l0 -11c0,-104623 -85607,-190206 -190206,-190206l-883447 0c-104599,0 -190206,85607 -190206,190206l0 11c0,104600 85583,190206 190206,190206z"/>
+                        <path fill="#FDF38E" fill-rule="nonzero"
+                              d="M2467481 4123114c0,26905 -13406,40346 -40205,40346l-134387 0 0 -174851 107481 0 26906 0c26799,0 40205,13441 40205,40335l0 94170zm-134387 141l80729 0c8941,0 13453,-4488 13453,-13488l0 -67465c0,-9000 -4512,-13488 -13453,-13488l-80729 0 0 94441zm174946 40205l0 -174851 134387 0c26799,0 40205,13441 40205,40382l0 26894c0,26941 -13406,40382 -40205,40382l-13500 0 53705 40300 0 26893 -23138 0 -97796 -67193 -13453 0 0 67193 -40205 0zm40205 -107398l80729 0c8941,0 13453,-4535 13453,-13630 0,-9083 -4512,-13618 -13453,-13618l-80729 0 0 27248zm349538 67052c0,26905 -13406,40346 -40205,40346l-94182 0c-26799,0 -40205,-13441 -40205,-40346l0 -94170c0,-26894 13406,-40335 40205,-40335l94182 0c26799,0 40205,13441 40205,40335l0 94170zm-134387 -80812l0 67465c0,9000 4500,13488 13453,13488l67276 0c8941,0 13453,-4488 13453,-13488l0 -67465c0,-9000 -4512,-13488 -13453,-13488l-67276 0c-8953,0 -13453,4488 -13453,13488zm174946 121158l0 -174851 134387 0c26799,0 40205,13441 40205,40382l0 26894c0,26941 -13406,40382 -40205,40382l-94182 0 0 67193 -40205 0zm40205 -107398l80729 0c8941,0 13453,-4535 13453,-13630 0,-9083 -4512,-13618 -13453,-13618l-80729 0 0 27248z"/>
+                    </g>
+                </svg>
+                <div id="toys"></div>
+                <div id="claw">
+                    <div
+                        style="position:absolute;top:0;left:10px;width:40px;height:20px;background:#5b5b5b;border-radius:5px;"></div>
+                    <div id="clawBar"></div>
+                    <div id="clawALL">
+                        <div id="clawBall"></div>
+                        <div id="leftClaw"></div>
+                        <div id="rightClaw"></div>
+                    </div>
+                </div>
+                <div id="moveContainer">
+                    <div id="moveControl"></div>
+                </div>
+                <div
+                    style="position:absolute;top:331px;left:35px;width:52px;height:12px;background-color:#565656;border-bottom:2px solid #898989;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h1>Небольшая разминка рук для следующей комнаты 🌚</h1>
+        <div id="razminka"></div>
+    </div>
+
+    <div id="jackpot" class="section">
+        <div class="claw">
+            <div class="card">
+                <div class="card-content">
+                    <h1>Желаю побольше побед в жизни!</h1>
+                    <p>И пусть эта небольшая рулетка будет всегда беспроигрышной для
+                        тебя 🎰</p>
+                </div>
+            </div>
+            <div id="roulette" class="wheel">♠️ ♦️️ ♣️️ ♥️</div>
+        </div>
+    </div>
+</div>
+
+<div class="room3">
+    <div id="room3"></div>
+
+    <div class="section">
+        <div class="claw">
+            <div class="card">
+                <div class="card-content">
+                    <h1>Перед тобой беспроигрышная лотерея</h1>
+                    <p>Желаю, чтобы ты выиграла в этой лотереи жизни главный приз 🤞</p>
+                </div>
+            </div>
+
+            <div id="lotteryTicket">
+                <div id="scratchLayer"></div>
+                <div id="message">Счастье!</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        Тут будет видео
+    </div>
+
+</div>
+
+<script>
+    const scratchLayer = document.getElementById('scratchLayer');
+    const message = document.getElementById('message');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const radius = 20;
+
+    canvas.width = scratchLayer.offsetWidth;
+    canvas.height = scratchLayer.offsetHeight;
+
+    scratchLayer.addEventListener('mousedown', startScratch);
+    scratchLayer.addEventListener('mouseup', endScratch);
+    scratchLayer.addEventListener('mousemove', scratch);
+    scratchLayer.addEventListener('mouseleave', endScratch);
+
+    let isDrawing = false;
+
+    function startScratch() {
+        isDrawing = true;
+    }
+
+    function endScratch() {
+        isDrawing = false;
+    }
+
+    function scratch(e) {
+        if (!isDrawing) return;
+
+        const rect = scratchLayer.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        scratchLayer.style.background = `url(${canvas.toDataURL()})`;
+        scratchLayer.style.backgroundSize = '100% 100%';
+
+        if (getTransparentPixelCount() > 30000) {
+            message.style.display = 'block';
+            scratchLayer.style.pointerEvents = 'none'; // Блокируем дальнейшее стирание
+        }
+    }
+
+    function getTransparentPixelCount() {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let count = 0;
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            if (imageData.data[i + 3] === 0) count++; // A (alpha) channel
+        }
+        return count;
+    }
+
+    // Инициализация слоя с цветом
+    ctx.fillStyle = 'gray';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    scratchLayer.style.background = `url(${canvas.toDataURL()})`;
+    scratchLayer.style.backgroundSize = '100% 100%';
+
+    const arrow = document.getElementById('arrow');
+    const hero = document.getElementById('hero');
+
+    // Добавляем событие для анимации сгибания
+    arrow.addEventListener('animationiteration', () => {
+        arrow.style.animationPlayState = "paused";
+        hero.classList.add('bend');
+        setTimeout(() => {
+            hero.src = 'images/kneeman.png'; // Новое изображение человека
+            setTimeout(() => {
+                hero.classList.remove('bend');
+                hero.src = 'images/standman.png'; // Новое изображение человека
+                arrow.style.animationPlayState = "running";
+            }, 1000);
+        }, 500);
+    });
+
+    document.getElementById('roulette').addEventListener('click', () => {
+        const roulette = document.getElementById('roulette');
+        roulette.style.transform = 'rotate(720deg)'; // Запускаем вращение рулетки
+
+        setTimeout(() => {
+            roulette.textContent = '❤️ ❤️ ❤️ ❤️'; // После вращения показываем черви
+            explodeHearts();
+        }, 5000); // Время вращения рулетки
+    });
+
+    function explodeHearts() {
+        const heartCount = 1000; // Количество взлетающих сердечек
+        for (let i = 0; i < heartCount; i++) {
+            setTimeout(() => {
+                createHeart();
+            }, i * 100); // Задержка для каждого сердца, чтобы создавать эффект взлета
+        }
+    }
+
+    function createHeart() {
+        const heart = document.createElement('div');
+        heart.classList.add('heart', 'emoji');
+        heart.textContent = '❤️';
+        heart.style.left = Math.random() * 100 + "vw"; // Случайное положение по ширине
+        heart.style.animationDelay = Math.random() + "s"; // Случайная задержка анимации
+        document.getElementById('jackpot').appendChild(heart);
+
+        // Удаляем сердце после анимации
+        heart.addEventListener('animationend', () => {
+            heart.remove();
+        });
+    }
+
+</script>
+<script>
+    var isDragging = false;
+    var toyOffset;
+    $(document).ready(function () {
+        $("body").on("click", "#b_drop", function () {
+            toyOffset = $(".toy").offset();
+            $("#b_drop,#moveContainer").hide();
+            openClaws();
+            $("#clawBar").stop().animate({
+                "height": "+=180px"
+            }, {
+                duration: 1000,
+                easing: "linear",
+                complete: function () {
+                }
+            });
+            $("#clawALL").stop().animate({
+                "top": "+=180px"
+            }, {
+                duration: 1000,
+                easing: "linear",
+                step: function () {
+                    clawBallOffset = $("#clawBall").offset();
+                    var horizontalOK = ((clawBallOffset.left - 31) < toyOffset.left) && ((clawBallOffset.left + 37) > toyOffset.left + 50);
+                    if ((clawBallOffset.top + 10) > toyOffset.top && horizontalOK) {
+                        // WIN (TAKE THE TOY)
+                        $("#clawALL,#clawBar").stop();
+                        closeClaws();
+                        var bgPos = $(".toy").css("background-position");
+                        var htmlToy = "<div class='toy' style='background-position:" + (bgPos) + ";top:35px;left:6px;'></div>";
+                        $(".toy").remove();
+                        $("#clawALL").append(htmlToy);
+                        $("#clawBar").stop().animate({
+                            "height": "15px"
+                        }, {
+                            duration: 1000,
+                            easing: "linear",
+                            complete: function () {
+                            }
+                        });
+                        $("#clawALL").stop().animate({
+                            "top": "0px"
+                        }, {
+                            duration: 1000,
+                            easing: "linear",
+                            complete: function () {
+                                $("#claw").stop().animate({
+                                    "left": "30px"
+                                }, {
+                                    duration: 1000,
+                                    easing: "linear",
+                                    complete: function () {
+                                        openClaws();
+                                        $(".toy").stop().animate({
+                                            "top": "+=260px"
+                                        }, {
+                                            duration: 1000,
+                                            easing: "linear",
+                                            complete: function () {
+                                                $(".toy").css({
+                                                    "z-index": "100",
+                                                    "animation": "fullsize 1s 1 linear",
+                                                    "transform": "scale(4) translate(30px,-30px)"
+                                                });
+                                                setTimeout(function () {
+                                                    $(".toy").stop().animate({
+                                                        "opacity": "0"
+                                                    }, {
+                                                        duration: 500,
+                                                        easing: "linear",
+                                                        complete: function () {
+                                                            $("#moveControl").css("left", "-2px");
+                                                            $("#moveContainer").show();
+                                                            $(".toy").remove();
+                                                            placeToy();
+                                                        }
+                                                    });
+                                                }, 1500);
+                                            }
+                                        });
+                                        setTimeout(function () {
+                                            closeClaws();
+                                        }, 300);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                },
+                complete: function () {
+                    // LOSE (NO TOY TAKEN)
+                    closeClaws();
+                    $("#clawBar").stop().animate({
+                        "height": "-=180px"
+                    }, {
+                        duration: 1000,
+                        easing: "linear",
+                        complete: function () {
+                        }
+                    });
+                    $("#clawALL").stop().animate({
+                        "top": "-=180px"
+                    }, {
+                        duration: 1000,
+                        easing: "linear",
+                        complete: function () {
+                            $("#claw").stop().animate({
+                                "left": "30px"
+                            }, {
+                                duration: 1000,
+                                easing: "linear",
+                                complete: function () {
+                                    openClaws();
+                                    setTimeout(function () {
+                                        closeClaws();
+                                        $("#moveControl").css("left", "-2px");
+                                        $("#moveContainer").show();
+                                        $(".toy").remove();
+                                        placeToy();
+                                    }, 300);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        });
+        var horizontal = document.getElementById("moveControl");
+        var mc_horizontal = new Hammer(horizontal);
+        mc_horizontal.add(new Hammer.Pan({
+            direction: Hammer.DIRECTION_HORIZONTAL, threshold: 0
+        }));
+        mc_horizontal.on("pan", handle_horizontal);
+        placeToy();
+    });
+
+    function openClaws() {
+        $("#rightClaw,#leftClaw").css({
+            "transform": "rotate(0deg)"
+        });
+    }
+
+    function closeClaws() {
+        $("#rightClaw").css({
+            "transform": "rotate(30deg)"
+        });
+        $("#leftClaw").css({
+            "transform": "rotate(-30deg)"
+        });
+    }
+
+    function placeToy() {
+        var col = Math.floor(Math.random() * 7);
+        var row = Math.floor(Math.random() * 7);
+        var toyTop = Math.floor(Math.random() * 70);
+        var toyLeft = Math.floor(Math.random() * 160);
+        var htmlToy = "<div class='toy' style='background-position:" + (col * 50) + "px " + (row * 50) + "px;top:" + (toyTop) + "px;left:" + (toyLeft) + "px;'></div>";
+        $("#toys").append(htmlToy);
+    }
+
+    function handle_horizontal(ev) {
+        var elem = ev.target;
+        if (!isDragging) {
+            isDragging = true;
+            lastPosX = elem.offsetLeft;
+        }
+        var posX = ev.deltaX + lastPosX;
+        if (posX < -2) posX = -2;
+        if (posX > 193) posX = 193;
+        elem.style.left = posX + "px";
+        var clawPosX = posX * 165 / 193 + 105;
+        $("#claw").css({
+            "left": (clawPosX) + "px"
+        });
+        $("#b_drop").show();
+        if (ev.isFinal) {
+            isDragging = false;
+        }
+    }
+</script>
+</body>
+</html>
